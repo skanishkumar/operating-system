@@ -1,0 +1,19 @@
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main()
+{
+    int fd;
+    char msg[]="Hello UNIX";
+
+    fd=open("file.txt",O_CREAT|O_WRONLY,0644);
+
+    write(fd,msg,sizeof(msg));
+
+    close(fd);
+
+    printf("File Created and Written\n");
+
+    return 0;
+}
