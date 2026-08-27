@@ -1,0 +1,139 @@
+1.PSEUDOCODE File System Space Management Algorithm
+BEGIN
+    SET THRESHOLD = 80
+    SET TARGET_USAGE = 70
+    usage = GET_DISK_USAGE_PERCENT()
+    WHILE usage > THRESHOLD DO
+        log_files = GET_LOG_FILES()
+        SORT log_files BY last_modified ASC   // oldest first
+        FOR each file IN log_files DO
+            IF file IS NOT compressed THEN
+                COMPRESS(file)
+            ELSE
+                DELETE(file)
+            ENDIF
+            usage = GET_DISK_USAGE_PERCENT()
+            IF usage <= TARGET_USAGE THEN
+                EXIT FOR
+            ENDIF
+        ENDFOR
+    ENDWHILE
+    PRINT "Disk usage under control"
+END
+
+EXPLANATION
+Compresses logs before deleting them.
+Deletes oldest logs first.
+Continuously monitors until usage is controlled.
+
+2.PSEUDOCODE: Priority-Based CPU Scheduling Algorithm
+BEGIN
+    INPUT process_list
+    WHILE process_list IS NOT EMPTY DO
+        SORT process_list BY priority DESC
+        current_process = FIRST(process_list)
+        ALLOCATE_CPU(current_process)
+        EXECUTE(current_process, TIME_SLICE)
+        IF current_process IS COMPLETED THEN
+            REMOVE current_process FROM process_list
+        ELSE
+            current_process.priority =
+                current_process.priority - 1
+            INSERT current_process BACK INTO process_list
+        ENDIF
+    ENDWHILE
+    PRINT "All processes executed"
+END
+
+EXPLANATION:
+Uses time slicing for fairness.
+Prevents starvation by gradually lowering priorities.
+Handles process completion properly.
+
+
+3.PSEUDOCODE:RAM Allocation for Multiple Virtual Machines
+
+BEGIN
+    total_RAM = 16 GB
+    host_reserved = 4 GB
+    available_RAM = total_RAM - host_reserved
+    INPUT number_of_VMs
+    min_RAM = 2 GB
+    required_RAM = number_of_VMs * min_RAM
+    IF required_RAM > available_RAM THEN
+        PRINT "Insufficient memory for all VMs"
+        EXIT
+    ENDIF
+    FOR i = 1 TO number_of_VMs DO
+        VM[i].RAM = min_RAM
+        available_RAM = available_RAM - min_RAM
+    ENDFOR
+    WHILE available_RAM > 0 DO
+        FOR each VM DO
+            VM.RAM = VM.RAM + 1 GB
+            available_RAM = available_RAM - 1 GB
+            IF available_RAM = 0 THEN
+                BREAK
+            ENDIF
+        ENDFOR
+    ENDWHILE
+    PRINT "RAM allocation completed"
+END
+
+EXPLANATIN: 
+Checks memory availability before allocation.
+Distributes extra RAM fairly among VMs.
+Ensures balanced resource utilization.
+
+4.PSEUDOCODE: Hypervisor Selection Algorithm
+
+BEGIN
+    INPUT performance_required
+    INPUT budget
+    INPUT hardware_access
+    INPUT security_level
+    IF performance_required = HIGH AND
+       hardware_access = TRUE AND
+       security_level = HIGH THEN
+        selected_hypervisor = "Type 1 Hypervisor"
+    ELSE IF budget = LOW THEN
+       selected_hypervisor = "Type 2 Hypervisor"
+    ELSE
+        selected_hypervisor = "Type 1 Hypervisor"
+    ENDIF
+    PRINT "Selected Hypervisor: ",
+          selected_hypervisor
+END
+
+EXPLANATI0N:
+Considers security requirements.
+Uses a decision variable for clarity.
+Better reflects real-world virtualization choices.
+
+5.PSEUDOCODE CPU and Memory Resource Limiting Using cgroups
+BEGIN
+    INPUT application_list
+    FOR each app IN application_list DO
+        CREATE_CGROUP(app)
+        cpu_limit = GET_CPU_REQUIREMENT(app)
+        memory_limit = GET_MEMORY_REQUIREMENT(app)
+        SET_CPU_LIMIT(app, cpu_limit)
+        SET_MEMORY_LIMIT(app, memory_limit)
+        ASSIGN_PROCESS_TO_CGROUP(app)
+    ENDFOR
+    WHILE system_is_running DO
+        FOR each app IN application_list DO
+            IF CPU_USAGE(app) > cpu_limit THEN
+                THROTTLE_CPU(app)
+            ENDIF
+            IF MEMORY_USAGE(app) > memory_limit THEN
+                RESTRICT_MEMORY(app)
+            ENDIF
+        ENDFOR
+    ENDWHILE
+    PRINT "Resource management active"
+END
+EXPLANATI0N:
+Dynamically monitors resource usage.
+Enforces limits continuously.
+Handles both CPU and memory violations.
