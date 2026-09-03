@@ -1,0 +1,135 @@
+/* ===================================================================
+   CSA04 - Operating Systems Assignment
+   Team 1: Online Food Delivery App
+   PART III : DISK SCHEDULING (CO4, Unit IV)
+   Algorithms: FCFS, SSTF, SCAN, C-SCAN
+   Cylinders = 0-100, Head start = 40
+   Queue = 55,18,90,66,32,75,10,88
+   =================================================================== */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define DQ 8         /* number of disk requests */
+#define CYL_MAX 100  /* max cylinder number */
+
+void diskFCFS(int req[], int n, int head) {
+    int total = 0, cur = head, i;
+    printf("\n--- FCFS Disk Scheduling ---\nOrder: %d", cur);
+    for (i = 0; i < n; i++) {
+        total += abs(req[i] - cur);
+        cur = req[i];
+        printf(" -> %d", cur);
+    }
+    printf("\nTotal Head Movement (FCFS) = %d\n", total);
+}
+
+void diskSSTF(int req[], int n, int head) {
+    int visited[DQ]; memset(visited, 0, sizeof(visited));
+    int cur = head, total = 0, i, j;
+    printf("\n--- SSTF Disk Scheduling ---\nOrder: %d", cur);
+    for (i = 0; i < n; i++) {
+        int best = -1, bestDist = 1000000;
+        for (j = 0; j < n; j++) {
+            if (!visited[j]) {
+                int d = abs(req[j] - cur);
+                if (d < bestDist) { bestDist = d; best = j; }
+            }
+        }
+        visited[best] = 1;
+        total += bestDist;
+        cur = req[best];
+        printf(" -> %d", cur);
+    }
+    printf("\nTotal Head Movement (SSTF) = %d\n", total);
+}
+
+int cmpInt(const void *a, const void *b) { return (*(int*)a - *(int*)b); }
+
+void diskSCAN(int req[], int n, int head, int maxCyl) {
+    int arr[DQ]; int i;
+    for (i = 0; i < n; i++) arr[i] = req[i];
+    qsort(arr, n, sizeof(int), cmpInt);
+
+    int total = 0, cur = head;
+    printf("\n--- SCAN Disk Scheduling (moving towards %d first) ---\nOrder: %d", maxCyl, cur);
+
+    /* upward pass: service requests >= head */
+    for (i = 0; i < n; i++) {
+        if (arr[i] >= head) {
+            total += abs(arr[i] - cur);
+            cur = arr[i];
+            printf(" -> %d", cur);
+        }
+    }
+    /* go to the end of the disk */
+    total += abs(maxCyl - cur);
+    cur = maxCyl;
+    printf(" -> %d(end)", cur);
+    /* downward pass: remaining requests < head, largest to smallest */
+    for (i = n - 1; i >= 0; i--) {
+        if (arr[i] < head) {
+            total += abs(cur - arr[i]);
+            cur = arr[i];
+            printf(" -> %d", cur);
+        }
+    }
+    printf("\nTotal Head Movement (SCAN) = %d\n", total);
+}
+
+void diskCSCAN(int req[], int n, int head, int maxCyl) {
+    int arr[DQ]; int i;
+    for (i = 0; i < n; i++) arr[i] = req[i];
+    qsort(arr, n, sizeof(int), cmpInt);
+
+    int total = 0, cur = head;
+    printf("\n--- C-SCAN Disk Scheduling (moving towards %d first) ---\nOrder: %d", maxCyl, cur);
+
+    /* upward pass: service requests >= head */
+    for (i = 0; i < n; i++) {
+        if (arr[i] >= head) {
+            total += abs(arr[i] - cur);
+            cur = arr[i];
+            printf(" -> %d", cur);
+        }
+    }
+    /* go to end of disk */
+    total += abs(maxCyl - cur);
+    cur = maxCyl;
+    printf(" -> %d(end)", cur);
+    /* jump to 0 (counted in total head movement by convention) */
+    total += maxCyl;
+    cur = 0;
+    printf(" -> 0(jump)");
+    /* service remaining requests (< head) from smallest upward */
+    for (i = 0; i < n; i++) {
+        if (arr[i] < head) {
+            total += abs(arr[i] - cur);
+            cur = arr[i];
+            printf(" -> %d", cur);
+        }
+    }
+    printf("\nTotal Head Movement (C-SCAN) = %d\n", total);
+}
+
+int main() {
+    printf("=====================================================================\n");
+    printf(" CSA04 OS ASSIGNMENT - TEAM 1: ONLINE FOOD DELIVERY APP\n");
+    printf(" PART III: DISK SCHEDULING\n");
+    printf("=====================================================================\n");
+
+    int req[DQ] = {55, 18, 90, 66, 32, 75, 10, 88};
+    int head = 40;
+    printf("\nDisk Queue: 55,18,90,66,32,75,10,88 | Head Start = %d | Cylinders = 0-%d\n", head, CYL_MAX);
+
+    diskFCFS(req, DQ, head);
+    diskSSTF(req, DQ, head);
+    diskSCAN(req, DQ, head, CYL_MAX);
+    diskCSCAN(req, DQ, head, CYL_MAX);
+
+    printf("\n=====================================================================\n");
+    printf(" END OF PART III SIMULATION\n");
+    printf("=====================================================================\n");
+    return 0;
+}
