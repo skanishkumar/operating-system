@@ -1,0 +1,85 @@
+//Experiment 39: C-SCAN Disk Scheduling
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int request[50], n, head, size;
+    int i, j, temp, movement = 0;
+
+    printf("Enter disk size: ");
+    scanf("%d", &size);
+
+    printf("Enter number of requests: ");
+    scanf("%d", &n);
+
+    printf("Enter request queue:\n");
+
+    for(i = 0; i < n; i++)
+        scanf("%d", &request[i]);
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    for(i = 0; i < n - 1; i++)
+    {
+        for(j = i + 1; j < n; j++)
+        {
+            if(request[i] > request[j])
+            {
+                temp = request[i];
+                request[i] = request[j];
+                request[j] = temp;
+            }
+        }
+    }
+
+    printf("\nSeek Sequence: %d ", head);
+
+    for(i = 0; i < n; i++)
+    {
+        if(request[i] >= head)
+        {
+            movement += abs(head - request[i]);
+            head = request[i];
+            printf("-> %d ", head);
+        }
+    }
+
+    movement += abs(head - (size - 1));
+    head = size - 1;
+
+    printf("-> %d ", head);
+
+    movement += size - 1;
+    head = 0;
+
+    printf("-> %d ", head);
+
+    for(i = 0; i < n; i++)
+    {
+        if(request[i] < head)
+            continue;
+
+        if(request[i] < request[0])
+            continue;
+    }
+
+    for(i = 0; i < n; i++)
+    {
+        if(request[i] < request[n - 1] && request[i] >= 0)
+        {
+            if(request[i] < head)
+            {
+                movement += abs(head - request[i]);
+                head = request[i];
+                printf("-> %d ", head);
+            }
+        }
+    }
+
+    printf("\nTotal Head Movement = %d\n", movement);
+
+    return 0;
+}

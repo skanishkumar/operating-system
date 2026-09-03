@@ -1,0 +1,46 @@
+//Experiment 16: Random Access File
+
+#include <stdio.h>
+
+struct Employee
+{
+    int id;
+    char name[30];
+    float salary;
+};
+
+int main()
+{
+    FILE *fp;
+    struct Employee e;
+    int n;
+
+    fp = fopen("employee.dat", "wb+");
+
+    printf("Enter employee ID: ");
+    scanf("%d", &e.id);
+
+    printf("Enter name: ");
+    scanf("%s", e.name);
+
+    printf("Enter salary: ");
+    scanf("%f", &e.salary);
+
+    fwrite(&e, sizeof(e), 1, fp);
+
+    printf("Enter record number to read: ");
+    scanf("%d", &n);
+
+    fseek(fp, (n - 1) * sizeof(e), SEEK_SET);
+
+    if(fread(&e, sizeof(e), 1, fp))
+    {
+        printf("\nID: %d\n", e.id);
+        printf("Name: %s\n", e.name);
+        printf("Salary: %.2f\n", e.salary);
+    }
+
+    fclose(fp);
+
+    return 0;
+}

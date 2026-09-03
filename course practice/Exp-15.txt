@@ -1,0 +1,56 @@
+//Experiment 15: Two Level Directory
+
+#include <stdio.h>
+#include <string.h>
+
+struct User
+{
+    char name[20];
+    char files[10][20];
+    int count;
+};
+
+int main()
+{
+    struct User u[10];
+    int users = 0, choice, x;
+    char name[20];
+
+    while(1)
+    {
+        printf("\n1.Create User  2.Create File  3.Display  4.Exit\n");
+        scanf("%d", &choice);
+
+        if(choice == 1)
+        {
+            printf("Enter user name: ");
+            scanf("%s", u[users].name);
+            u[users].count = 0;
+            users++;
+        }
+        else if(choice == 2)
+        {
+            printf("Enter user number: ");
+            scanf("%d", &x);
+
+            printf("Enter file name: ");
+            scanf("%s", name);
+
+            strcpy(u[x - 1].files[u[x - 1].count++], name);
+        }
+        else if(choice == 3)
+        {
+            for(int i = 0; i < users; i++)
+            {
+                printf("\nUser: %s\n", u[i].name);
+
+                for(int j = 0; j < u[i].count; j++)
+                    printf("%s\n", u[i].files[j]);
+            }
+        }
+        else
+            break;
+    }
+
+    return 0;
+}

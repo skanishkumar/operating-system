@@ -1,0 +1,50 @@
+//Experiment 12: Dining Philosophers
+
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+pthread_mutex_t fork_lock[5];
+
+void *philosopher(void *arg)
+{
+    int i = *(int *)arg;
+
+    int left = i;
+    int right = (i + 1) % 5;
+
+    printf("Philosopher %d is thinking\n", i + 1);
+
+    pthread_mutex_lock(&fork_lock[left]);
+    pthread_mutex_lock(&fork_lock[right]);
+
+    printf("Philosopher %d is eating\n", i + 1);
+    sleep(1);
+
+    pthread_mutex_unlock(&fork_lock[right]);
+    pthread_mutex_unlock(&fork_lock[left]);
+
+    printf("Philosopher %d finished eating\n", i + 1);
+
+    return NULL;
+}
+
+int main()
+{
+    pthread_t thread[5];
+    int id[5];
+
+    for(int i = 0; i < 5; i++)
+    {
+        pthread_mutex_init(&fork_lock[i], NULL);
+        id[i] = i;
+    }
+
+    for(int i = 0; i < 5; i++)
+        pthread_create(&thread[i], NULL, philosopher, &id[i]);
+
+    for(int i = 0; i < 5; i++)
+        pthread_join(thread[i], NULL);
+
+    return 0;
+}
