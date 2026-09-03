@@ -1,0 +1,156 @@
+/* ===================================================================
+   CSA04 - Operating Systems Assignment
+   Team 1: Online Food Delivery App
+   PART II : MEMORY MANAGEMENT (CO3, Unit III)
+   Algorithms: FIFO, LRU, Optimal Page Replacement
+   Also computes frame count and page-table sizing for the given
+   RAM / page-size / logical-address-space parameters.
+   =================================================================== */
+
+#include <stdio.h>
+#include <string.h>
+
+#define FRAMES 3     /* number of frames assigned to this process context */
+#define REFLEN 13    /* length of page reference string */
+
+/* ---------------------------------------------------------------
+   Reference string models a representative user session in the
+   Food Delivery domain:
+   0=Login 1=Home 2=RestaurantList 3=Menu 4=Cart 5=Checkout 6=Payment
+   --------------------------------------------------------------- */
+
+void fifoPageReplacement(int ref[], int n, int frames) {
+    int frame[10]; int filled = 0, faults = 0, ptr = 0;
+    int i, j;
+    for (i = 0; i < frames; i++) frame[i] = -1;
+
+    printf("\n--- FIFO Page Replacement (Frames = %d) ---\n", frames);
+    for (i = 0; i < n; i++) {
+        int hit = 0;
+        for (j = 0; j < filled; j++) if (frame[j] == ref[i]) hit = 1;
+        if (!hit) {
+            frame[ptr] = ref[i];
+            ptr = (ptr + 1) % frames;
+            if (filled < frames) filled++;
+            faults++;
+            printf("Ref %d -> Frames: [", ref[i]);
+            for (j = 0; j < filled; j++) printf("%d ", frame[j]);
+            printf("]  FAULT\n");
+        } else {
+            printf("Ref %d -> Frames: [", ref[i]);
+            for (j = 0; j < filled; j++) printf("%d ", frame[j]);
+            printf("]  HIT\n");
+        }
+    }
+    printf("Total Page Faults (FIFO) = %d\n", faults);
+}
+
+void lruPageReplacement(int ref[], int n, int frames) {
+    int frame[10], lastUsed[10]; int filled = 0, faults = 0;
+    int i, j;
+    for (i = 0; i < frames; i++) frame[i] = -1;
+
+    printf("\n--- LRU Page Replacement (Frames = %d) ---\n", frames);
+    for (i = 0; i < n; i++) {
+        int hit = -1;
+        for (j = 0; j < filled; j++) if (frame[j] == ref[i]) hit = j;
+        if (hit == -1) {
+            int victim;
+            if (filled < frames) { victim = filled; filled++; }
+            else {
+                int oldest = i, oldIdx = 0;
+                for (j = 0; j < frames; j++) if (lastUsed[j] < oldest) { oldest = lastUsed[j]; oldIdx = j; }
+                victim = oldIdx;
+            }
+            frame[victim] = ref[i];
+            lastUsed[victim] = i;
+            faults++;
+            printf("Ref %d -> Frames: [", ref[i]);
+            for (j = 0; j < filled; j++) printf("%d ", frame[j]);
+            printf("]  FAULT\n");
+        } else {
+            lastUsed[hit] = i;
+            printf("Ref %d -> Frames: [", ref[i]);
+            for (j = 0; j < filled; j++) printf("%d ", frame[j]);
+            printf("]  HIT\n");
+        }
+    }
+    printf("Total Page Faults (LRU) = %d\n", faults);
+}
+
+void optimalPageReplacement(int ref[], int n, int frames) {
+    int frame[10]; int filled = 0, faults = 0;
+    int i, j;
+    for (i = 0; i < frames; i++) frame[i] = -1;
+
+    printf("\n--- Optimal Page Replacement (Frames = %d) ---\n", frames);
+    for (i = 0; i < n; i++) {
+        int hit = 0;
+        for (j = 0; j < filled; j++) if (frame[j] == ref[i]) hit = 1;
+        if (!hit) {
+            int victim;
+            if (filled < frames) { victim = filled; filled++; }
+            else {
+                int farthest = -1, victimIdx = 0;
+                for (j = 0; j < frames; j++) {
+                    int k, nextUse = 1000;
+                    for (k = i + 1; k < n; k++) if (ref[k] == frame[j]) { nextUse = k; break; }
+                    if (nextUse > farthest) { farthest = nextUse; victimIdx = j; }
+                }
+                victim = victimIdx;
+            }
+            frame[victim] = ref[i];
+            faults++;
+            printf("Ref %d -> Frames: [", ref[i]);
+            for (j = 0; j < filled; j++) printf("%d ", frame[j]);
+            printf("]  FAULT\n");
+        } else {
+            printf("Ref %d -> Frames: [", ref[i]);
+            for (j = 0; j < filled; j++) printf("%d ", frame[j]);
+            printf("]  HIT\n");
+        }
+    }
+    printf("Total Page Faults (Optimal) = %d\n", faults);
+}
+
+/* ---- frame count / page table sizing for the assigned parameters ---- */
+void memorySizing() {
+    long ramBytes   = 4L * 1024 * 1024 * 1024;   /* 4 GB  */
+    long pageSize   = 4L * 1024;                  /* 4 KB  */
+    long procSpace  = 32L * 1024 * 1024;          /* 32 MB */
+
+    long totalFrames = ramBytes / pageSize;
+    long numPages     = procSpace / pageSize;
+
+    printf("\n--- Memory Sizing (Q4) ---\n");
+    printf("Physical RAM                = 4 GB\n");
+    printf("Page size                   = 4 KB\n");
+    printf("Total physical frames       = %ld\n", totalFrames);
+    printf("Process logical space       = 32 MB\n");
+    printf("Pages needed for process    = %ld\n", numPages);
+    printf("Page-table entries required = %ld (single-level)\n", numPages);
+}
+
+int main() {
+    printf("=====================================================================\n");
+    printf(" CSA04 OS ASSIGNMENT - TEAM 1: ONLINE FOOD DELIVERY APP\n");
+    printf(" PART II: MEMORY MANAGEMENT - PAGE REPLACEMENT\n");
+    printf("=====================================================================\n");
+
+    memorySizing();
+
+    int ref[REFLEN] = {0, 1, 2, 3, 1, 0, 4, 5, 1, 0, 6, 2, 3};
+    printf("\nReference string (session pages): ");
+    int i;
+    for (i = 0; i < REFLEN; i++) printf("%d ", ref[i]);
+    printf("\n(0=Login 1=Home 2=RestaurantList 3=Menu 4=Cart 5=Checkout 6=Payment)\n");
+
+    fifoPageReplacement(ref, REFLEN, FRAMES);
+    lruPageReplacement(ref, REFLEN, FRAMES);
+    optimalPageReplacement(ref, REFLEN, FRAMES);
+
+    printf("\n=====================================================================\n");
+    printf(" END OF PART II SIMULATION\n");
+    printf("=====================================================================\n");
+    return 0;
+}
