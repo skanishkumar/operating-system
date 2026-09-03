@@ -1,0 +1,34 @@
+//Experiment 30: Thread Create, Join, Equal and Exit
+
+#include <stdio.h>
+#include <pthread.h>
+
+void *function(void *arg)
+{
+    printf("Thread is running\n");
+
+    pthread_exit(NULL);
+}
+
+int main()
+{
+    pthread_t t1, t2;
+
+    // Create
+    pthread_create(&t1, NULL, function, NULL);
+    pthread_create(&t2, NULL, function, NULL);
+
+    // Equal
+    if(pthread_equal(t1, t2))
+        printf("Threads are equal\n");
+    else
+        printf("Threads are different\n");
+
+    // Join
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    printf("Threads joined successfully\n");
+
+    return 0;
+}
